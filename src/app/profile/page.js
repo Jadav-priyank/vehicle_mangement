@@ -180,11 +180,11 @@ export default function ProfilePage() {
               id="profile-new-id"
               type="text"
               className="form-input"
-              placeholder={`Leave blank to keep "${username}"`}
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               autoComplete="off"
             />
+
             <p className="form-field-hint">
               Minimum 3 characters. Leave blank if you only want to change password.
             </p>

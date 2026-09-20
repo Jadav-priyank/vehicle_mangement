@@ -146,11 +146,11 @@ export default function AccountModal({ isOpen, onClose, currentUsername, onUpdat
               id="update-new-id"
               type="text"
               className="input-field"
-              placeholder={`Leave blank to keep "${currentUsername || 'Traminsto'}"`}
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               autoComplete="off"
             />
+
             <p className="form-field-hint">
               Minimum 3 characters. Leave blank if you only want to change the password.
             </p>

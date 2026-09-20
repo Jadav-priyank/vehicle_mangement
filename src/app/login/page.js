@@ -78,7 +78,6 @@ function LoginForm() {
             id="login-username"
             type="text"
             className="login-input"
-            placeholder="e.g. Traminsto"
             value={username}
             onChange={(e) => {
               setUsername(e.target.value);
@@ -88,6 +87,7 @@ function LoginForm() {
             autoComplete="username"
             required
           />
+
         </div>
 
         <div className="form-group">
