@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import AccountModal from './components/AccountModal';
 import ProfileMenu from './components/ProfileMenu';
 
 function normalize(str) {
@@ -17,7 +16,6 @@ export default function SearchPage() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState({});
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
   const [username, setUsername] = useState('Traminsto');
-  const [showAccountModal, setShowAccountModal] = useState(false);
   const debounceTimer = useRef(null);
 
   useEffect(() => {
@@ -96,7 +94,6 @@ export default function SearchPage() {
           <div className="nav-right-divider" />
           <ProfileMenu
             username={username}
-            onOpenAccountModal={() => setShowAccountModal(true)}
             onLogout={handleLogout}
           />
         </div>
@@ -301,15 +298,8 @@ export default function SearchPage() {
           </div>
         </div>
       )}
-
-      {/* Account Settings Modal */}
-      <AccountModal
-        isOpen={showAccountModal}
-        onClose={() => setShowAccountModal(false)}
-        currentUsername={username}
-        onUpdated={(newU) => setUsername(newU)}
-      />
     </div>
   );
 }
+
 

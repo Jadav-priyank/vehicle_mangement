@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import AccountModal from '../components/AccountModal';
 import ProfileMenu from '../components/ProfileMenu';
 
 const getPhotoSrc = (p) => p?.url || (p?.filename ? `/uploads/${p.filename}` : '');
@@ -38,18 +37,8 @@ export default function AdminPage() {
   // Filter state for vehicle list
   const [filterQuery, setFilterQuery] = useState('');
 
-  // Auth & Account state
+  // Auth state
   const [username, setUsername] = useState('Traminsto');
-  const [showAccountModal, setShowAccountModal] = useState(false);
-
-  // Security tab state
-  const [secNewId, setSecNewId] = useState('');
-  const [secCurrentPass, setSecCurrentPass] = useState('');
-  const [secNewPass, setSecNewPass] = useState('');
-  const [secConfirmPass, setSecConfirmPass] = useState('');
-  const [secShowCurrent, setSecShowCurrent] = useState(false);
-  const [secShowNew, setSecShowNew] = useState(false);
-  const [secUpdating, setSecUpdating] = useState(false);
 
   const addToast = useCallback((message, type = 'success') => {
     const id = Date.now();
@@ -75,59 +64,6 @@ export default function AdminPage() {
       console.error('Logout error:', err);
     }
     window.location.href = '/login';
-  };
-
-  const handleSecuritySubmit = async (e) => {
-    e.preventDefault();
-    if (!secCurrentPass) {
-      addToast('Please enter your current password to authorize changes', 'error');
-      return;
-    }
-    if (secNewPass && secNewPass !== secConfirmPass) {
-      addToast('New passwords do not match', 'error');
-      return;
-    }
-    if (secNewPass && secNewPass.length < 4) {
-      addToast('New password must be at least 4 characters long', 'error');
-      return;
-    }
-    if (secNewId && secNewId.trim().length < 3) {
-      addToast('New ID must be at least 3 characters long', 'error');
-      return;
-    }
-    if (!secNewId.trim() && !secNewPass.trim()) {
-      addToast('Please enter a new ID or new password', 'error');
-      return;
-    }
-
-    setSecUpdating(true);
-    try {
-      const res = await fetch('/api/auth/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          currentPassword: secCurrentPass,
-          newUsername: secNewId.trim() || undefined,
-          newPassword: secNewPass || undefined,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        addToast(data.error || 'Failed to update credentials', 'error');
-        return;
-      }
-      addToast('Credentials updated successfully!', 'success');
-      if (data.username) setUsername(data.username);
-      setSecNewId('');
-      setSecCurrentPass('');
-      setSecNewPass('');
-      setSecConfirmPass('');
-    } catch (err) {
-      console.error('Security update error:', err);
-      addToast('Network error while updating credentials', 'error');
-    } finally {
-      setSecUpdating(false);
-    }
   };
 
   const fetchData = useCallback(async () => {
@@ -422,11 +358,11 @@ export default function AdminPage() {
           <div className="nav-right-divider" />
           <ProfileMenu
             username={username}
-            onOpenAccountModal={() => setShowAccountModal(true)}
             onLogout={handleLogout}
           />
         </div>
       </nav>
+
 
 
 
@@ -487,14 +423,8 @@ export default function AdminPage() {
         >
           📦 Bulk
         </button>
-        <button
-          className={`tab ${activeTab === 'security' ? 'active' : ''}`}
-          onClick={() => setActiveTab('security')}
-          id="tab-security-btn"
-        >
-          🔐 ID & Password
-        </button>
       </div>
+
 
 
       {/* ===== ADD TAB ===== */}
@@ -884,128 +814,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ===== SECURITY / CREDENTIALS TAB ===== */}
-      {activeTab === 'security' && (
-        <div className="card" style={{ animation: 'fadeInUp 0.3s ease' }}>
-          <h2 className="section-title">🔐 Update Website Login ID & Password</h2>
-          <p className="form-hint" style={{ marginBottom: '1.25rem' }}>
-            Directly update your ID and Password here. Any changes take effect immediately across the website.
-          </p>
-
-          <form onSubmit={handleSecuritySubmit} style={{ maxWidth: '520px' }}>
-            <div className="form-group">
-              <label className="form-label">Current Login ID</label>
-              <div className="current-id-display">
-                <span className="user-icon">👤</span>
-                <span className="current-id-text">{username}</span>
-                <span className="current-id-badge">Active</span>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="sec-new-id">
-                New Login ID (optional)
-              </label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder={`Leave blank to keep "${username}"`}
-                value={secNewId}
-                onChange={(e) => setSecNewId(e.target.value)}
-                id="sec-new-id"
-                autoComplete="off"
-              />
-              <p className="form-hint">Must be at least 3 characters if updating</p>
-            </div>
-
-            <div className="divider-line" style={{ margin: '1.25rem 0' }} />
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="sec-current-pass">
-                Current Password <span style={{ color: 'var(--error)' }}>*</span>
-              </label>
-              <div className="password-input-wrap">
-                <input
-                  type={secShowCurrent ? 'text' : 'password'}
-                  className="form-input password-input"
-                  placeholder="Enter current password to verify"
-                  value={secCurrentPass}
-                  onChange={(e) => setSecCurrentPass(e.target.value)}
-                  required
-                  id="sec-current-pass"
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setSecShowCurrent(!secShowCurrent)}
-                  tabIndex="-1"
-                >
-                  {secShowCurrent ? '🙈' : '👁️'}
-                </button>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="sec-new-pass">
-                New Password (optional)
-              </label>
-              <div className="password-input-wrap">
-                <input
-                  type={secShowNew ? 'text' : 'password'}
-                  className="form-input password-input"
-                  placeholder="Leave blank to keep current password"
-                  value={secNewPass}
-                  onChange={(e) => setSecNewPass(e.target.value)}
-                  id="sec-new-pass"
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setSecShowNew(!secShowNew)}
-                  tabIndex="-1"
-                >
-                  {secShowNew ? '🙈' : '👁️'}
-                </button>
-              </div>
-            </div>
-
-            {secNewPass && (
-              <div className="form-group">
-                <label className="form-label" htmlFor="sec-confirm-pass">
-                  Confirm New Password <span style={{ color: 'var(--error)' }}>*</span>
-                </label>
-                <input
-                  type={secShowNew ? 'text' : 'password'}
-                  className="form-input"
-                  placeholder="Repeat new password"
-                  value={secConfirmPass}
-                  onChange={(e) => setSecConfirmPass(e.target.value)}
-                  required
-                  id="sec-confirm-pass"
-                />
-              </div>
-            )}
-
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={secUpdating}
-              style={{ marginTop: '0.75rem', width: '100%' }}
-              id="sec-save-btn"
-            >
-              {secUpdating ? (
-                <>
-                  <div className="loading-spinner" style={{ width: 18, height: 18 }} />
-                  Updating Credentials...
-                </>
-              ) : (
-                <>💾 Update Credentials</>
-              )}
-            </button>
-          </form>
-        </div>
-      )}
 
 
       {/* ===== EDIT MODAL ===== */}
@@ -1080,18 +888,8 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-
-      {/* ===== ACCOUNT / CREDENTIALS MODAL ===== */}
-      <AccountModal
-        isOpen={showAccountModal}
-        onClose={() => setShowAccountModal(false)}
-        currentUsername={username}
-        onUpdated={(newU) => {
-          setUsername(newU);
-          addToast('Credentials updated successfully!', 'success');
-        }}
-      />
     </div>
   );
 }
+
 
