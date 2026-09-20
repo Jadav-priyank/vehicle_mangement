@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import AccountModal from './components/AccountModal';
+import ProfileMenu from './components/ProfileMenu';
 
 function normalize(str) {
   return str.toUpperCase().replace(/[\s\-\.]/g, '');
@@ -14,7 +16,27 @@ export default function SearchPage() {
   const [searched, setSearched] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState({});
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
+  const [username, setUsername] = useState('Traminsto');
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const debounceTimer = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.username) setUsername(data.username);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+    window.location.href = '/login';
+  };
 
   const doSearch = useCallback(async (q) => {
     const trimmed = q.trim();
@@ -62,15 +84,26 @@ export default function SearchPage() {
           <span className="mobile-only">VRM</span>
           <span className="desktop-only">Vehicle Records</span>
         </Link>
-        <div className="nav-links">
-          <Link href="/" className="nav-link active">
-            🔍 Search
-          </Link>
-          <Link href="/admin" className="nav-link">
-            ⚙️ Admin
-          </Link>
+        <div className="nav-right">
+          <div className="nav-links">
+            <Link href="/" className="nav-link active">
+              🔍 Search
+            </Link>
+            <Link href="/admin" className="nav-link">
+              ⚙️ Admin
+            </Link>
+          </div>
+          <div className="nav-right-divider" />
+          <ProfileMenu
+            username={username}
+            onOpenAccountModal={() => setShowAccountModal(true)}
+            onLogout={handleLogout}
+          />
         </div>
       </nav>
+
+
+
 
       {/* Header */}
       <h1 className="page-title">Search Vehicles</h1>
@@ -268,6 +301,15 @@ export default function SearchPage() {
           </div>
         </div>
       )}
+
+      {/* Account Settings Modal */}
+      <AccountModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        currentUsername={username}
+        onUpdated={(newU) => setUsername(newU)}
+      />
     </div>
   );
 }
+
