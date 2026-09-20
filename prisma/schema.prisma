@@ -3,26 +3,28 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Photo {
-  id           String    @id @default(uuid())
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  url          String
   filename     String
   originalName String
   createdAt    DateTime  @default(now())
-  vehicles     Vehicle[]
+  vehicleIds   String[]  @db.ObjectId
+  vehicles     Vehicle[] @relation(fields: [vehicleIds], references: [id])
 }
 
 model Vehicle {
-  id               String   @id @default(uuid())
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
   vehicleNumber    String
   normalizedNumber String
   notes            String?
   addedDate        DateTime @default(now())
-  photoId          String
-  photo            Photo    @relation(fields: [photoId], references: [id])
+  photoIds         String[] @db.ObjectId
+  photos           Photo[]  @relation(fields: [photoIds], references: [id])
 
   @@index([normalizedNumber])
 }
