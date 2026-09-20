@@ -44,7 +44,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No files uploaded' }, { status: 400 });
     }
 
-    const hasVercelBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN || process.env.VEHICLE_BLOB_READ_WRITE_TOKEN;
+    const hasVercelBlob = Boolean(blobToken);
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
     if (!hasVercelBlob) {
       await mkdir(uploadDir, { recursive: true });
@@ -62,6 +63,7 @@ export async function POST(request) {
         const blob = await put(`vehicles/${filename}`, file, {
           access: 'public',
           contentType: file.type || 'image/jpeg',
+          token: blobToken,
         });
         imageUrl = blob.url;
       } else {

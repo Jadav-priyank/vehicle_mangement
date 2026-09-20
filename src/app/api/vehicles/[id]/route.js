@@ -59,9 +59,10 @@ import path from 'path';
 
 // Helper to safely delete photo file/blob
 async function deletePhotoFile(photo) {
-  if (photo.url && photo.url.startsWith('http') && process.env.BLOB_READ_WRITE_TOKEN) {
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN || process.env.VEHICLE_BLOB_READ_WRITE_TOKEN;
+  if (photo.url && photo.url.startsWith('http') && blobToken) {
     try {
-      await del(photo.url);
+      await del(photo.url, { token: blobToken });
     } catch (e) {
       console.warn('Could not delete blob:', e.message);
     }
