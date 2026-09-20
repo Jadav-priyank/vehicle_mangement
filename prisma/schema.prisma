@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Photo {
+  id           String    @id @default(uuid())
+  filename     String
+  originalName String
+  createdAt    DateTime  @default(now())
+  vehicles     Vehicle[]
+}
+
+model Vehicle {
+  id               String   @id @default(uuid())
+  vehicleNumber    String
+  normalizedNumber String
+  notes            String?
+  addedDate        DateTime @default(now())
+  photoId          String
+  photo            Photo    @relation(fields: [photoId], references: [id])
+
+  @@index([normalizedNumber])
+}
