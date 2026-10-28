@@ -15,16 +15,25 @@ export default function SearchPage() {
   const [searched, setSearched] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState({});
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
-  const [username, setUsername] = useState('Traminsto');
+  const [username, setUsername] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const debounceTimer = useRef(null);
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then((res) => res.json())
       .then((data) => {
-        if (data?.username) setUsername(data.username);
+        if (data?.authenticated && data?.username) {
+          setIsAuthenticated(true);
+          setUsername(data.username);
+        } else {
+          setIsAuthenticated(false);
+          setUsername('');
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        setIsAuthenticated(false);
+      });
   }, []);
 
   const handleLogout = async () => {
@@ -33,7 +42,9 @@ export default function SearchPage() {
     } catch (err) {
       console.error('Logout error:', err);
     }
-    window.location.href = '/login';
+    setIsAuthenticated(false);
+    setUsername('');
+    window.location.href = '/';
   };
 
   const doSearch = useCallback(async (q) => {
@@ -92,10 +103,16 @@ export default function SearchPage() {
             </Link>
           </div>
           <div className="nav-right-divider" />
-          <ProfileMenu
-            username={username}
-            onLogout={handleLogout}
-          />
+          {isAuthenticated ? (
+            <ProfileMenu
+              username={username}
+              onLogout={handleLogout}
+            />
+          ) : (
+            <Link href="/login" className="nav-link-login" id="nav-login-btn">
+              🔑 Admin Login
+            </Link>
+          )}
         </div>
       </nav>
 

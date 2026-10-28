@@ -8,12 +8,12 @@ export async function GET() {
     const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
 
     if (!token) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json({ authenticated: false, username: null });
     }
 
     const payload = await verifySessionToken(token);
     if (!payload || !payload.username) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json({ authenticated: false, username: null });
     }
 
     return NextResponse.json({
@@ -21,6 +21,6 @@ export async function GET() {
       username: payload.username,
     });
   } catch (err) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return NextResponse.json({ authenticated: false, username: null });
   }
 }

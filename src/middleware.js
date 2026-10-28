@@ -4,22 +4,31 @@ import { AUTH_COOKIE_NAME, verifySessionToken } from './lib/session';
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // 1. Allow Next internals, uploads, static assets, and login API
+  // 1. Allow Next internals, uploads, static assets, and login/auth status APIs
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/uploads') ||
     pathname === '/favicon.ico' ||
-    pathname === '/api/auth/login'
+    pathname === '/api/auth/login' ||
+    pathname === '/api/auth/me'
   ) {
     return NextResponse.next();
   }
 
-  // 2. Check session
+  // 2. Allow public vehicle search and viewing results without login
+  if (pathname === '/') {
+    return NextResponse.next();
+  }
+  if (pathname === '/api/vehicles' && request.method === 'GET') {
+    return NextResponse.next();
+  }
+
+  // 3. Check session
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   const session = await verifySessionToken(token);
   const isAuthenticated = Boolean(session && session.username);
 
-  // 3. Handle login page
+  // 4. Handle login page
   if (pathname === '/login') {
     if (isAuthenticated) {
       // Already logged in, redirect to home
@@ -28,7 +37,7 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // 4. Protect all other pages & API routes
+  // 5. Protect all admin pages & restricted API routes
   if (!isAuthenticated) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

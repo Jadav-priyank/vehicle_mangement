@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 function LoginForm() {
   const router = useRouter();
@@ -139,6 +140,22 @@ function LoginForm() {
       </form>
 
       <div className="login-footer">
+        <div style={{ marginBottom: '1.25rem' }}>
+          <Link
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--text-accent)',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+            }}
+          >
+            ← Back to Vehicle Search (No login required)
+          </Link>
+        </div>
         <p className="login-security-notice">
           🔒 Secure authentication session. Vehicle Records Manager
         </p>
