@@ -94,23 +94,26 @@ export default function SearchPage() {
           <span className="desktop-only">Vehicle Records</span>
         </Link>
         <div className="nav-right">
-          <div className="nav-links">
-            <Link href="/" className="nav-link active">
-              🔍 Search
-            </Link>
-            <Link href="/admin" className="nav-link">
-              ⚙️ Admin
-            </Link>
-          </div>
-          <div className="nav-right-divider" />
           {isAuthenticated ? (
-            <ProfileMenu
-              username={username}
-              onLogout={handleLogout}
-            />
+            <>
+              <div className="nav-links">
+                <Link href="/" className="nav-link active">
+                  🔍 Search
+                </Link>
+                <Link href="/admin" className="nav-link">
+                  ⚙️ Admin
+                </Link>
+              </div>
+              <div className="nav-right-divider" />
+              <ProfileMenu
+                username={username}
+                onLogout={handleLogout}
+              />
+            </>
           ) : (
             <Link href="/login" className="nav-link-login" id="nav-login-btn">
-              🔑 Admin Login
+              <span className="login-icon">🔑</span>
+              <span>Admin Login</span>
             </Link>
           )}
         </div>
